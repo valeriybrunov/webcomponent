@@ -1,0 +1,71 @@
+/**
+ * Импортируем основные файлы веб-компонента для тестирования.
+ */
+import {{ name|capitalize }} from './{{ name|lower }}.js';
+import Template from './template.js';
+
+/**
+ * Настраиваем библиотеки для тестирования.
+ */
+mocha.setup('bdd');
+let assert = chai.assert;
+var expect = chai.expect;
+
+/**
+ * Тесты.
+ */
+describe("Заголовок.", function() {
+
+    /**
+     * Группа тестов.
+     */
+    describe("Заголовок подгруппы тестов", function() {
+
+        it("Возводит в степень n", function() {
+
+            // Для именованных классов необходимо создать объект.
+            let t = new {{ name|capitalize }}();
+
+            beforeEach( () => {});
+
+            assert.equal( t.pow(2, 3), 8, "Текст ошибки.");
+
+            afterEach( () => {});
+        });
+
+        it("Функция из файла template!", function() {
+
+            // Для именованных классов необходимо создать объект.
+            let t = new {{ name|capitalize }}();
+
+            beforeEach( () => {});
+
+            assert.equal( Template.mapDomShadow(), 8 );
+
+            afterEach( () => {});
+        });
+    });
+
+    /**
+     * Группа тестов.
+     */
+    describe("Заголовок подгруппы тестов", function() {
+
+        it("Возводит в степень n", function() {
+
+            // Для именованных классов необходимо создать объект.
+            let t = new {{ name|capitalize }}();
+
+            beforeEach( () => {});
+
+            assert.equal( t.pow(2, 3), 8, "Текст ошибки.");
+
+            afterEach( () => {});
+        });
+    });
+});
+
+/**
+ * Запуск тестов.
+ */
+mocha.run();

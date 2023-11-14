@@ -1,0 +1,378 @@
+/**
+ * Расширяемый веб-компонент "Paste". Открытая схема.
+ */
+
+import Template from './template.js';
+import Ajax from '../../ajax.js';
+
+/**
+ * Класс Paste
+ */
+export default class Paste extends HTMLElement {
+
+    /**
+     * Конструктор.
+     */
+    constructor() {
+        super();
+        this.classList.add('paste');
+        this.timerId = null;
+        this.myhead = document.getElementsByTagName('head')[0];
+        this.insertAdjacentHTML('afterbegin', Template.render());
+    }
+
+    /**
+     * Атрибут "url".
+     * 
+     * @param string val
+     * @return void
+     */
+    set url(val) {
+        this.setAttribute('url', val);
+    }
+    get url() {
+        if (this.hasAttribute('url')) {
+            return this.getAttribute('url');
+        }
+        else return Paste.DEFAULT_URL;
+    }
+    static get DEFAULT_URL() {
+        return '#';
+    }
+
+    /**
+     * Атрибут "mode".
+     * 
+     * @param string val
+     * @return void
+     */
+    set mode(val) {
+        this.setAttribute('mode', val);
+    }
+    get mode() {
+        if (this.hasAttribute('mode')) {
+            return this.getAttribute('mode');
+        }
+        else return Paste.DEFAULT_MODE;
+    }
+    static get DEFAULT_MODE() {
+        return 'html';
+    }
+
+    /**
+     * Атрибут "multiple".
+     * 
+     * @param string val
+     * @return void
+     */
+    set multiple(val) {
+        this.setAttribute('multiple', val);
+    }
+    get multiple() {
+        if (this.hasAttribute('multiple')) {
+            return this.getAttribute('multiple');
+        }
+        else return Paste.DEFAULT_MULTIPLE;
+    }
+    static get DEFAULT_MULTIPLE() {
+        return 'false';
+    }
+
+    /**
+     * Атрибут "timeout".
+     * 
+     * @param string val
+     * @return void
+     */
+    set timeout(val) {
+        this.setAttribute('timeout', val);
+    }
+    get timeout() {
+        if (this.hasAttribute('timeout')) {
+            return this.getAttribute('timeout');
+        }
+        else return Paste.DEFAULT_TIMEOUT;
+    }
+    static get DEFAULT_TIMEOUT() {
+        return '0';
+    }
+
+    /**
+     * Атрибут "classscroll".
+     *
+     * @param string val
+     * @return void
+     */
+    set classscroll(val) {
+        this.setAttribute('classscroll', val);
+    }
+    get classscroll() {
+        if (this.hasAttribute('classscroll')) {
+            return this.getAttribute('classscroll');
+        }
+        else return Paste.DEFAULT_CLASSSCROLL;
+    }
+    static get DEFAULT_CLASSSCROLL() {
+        return 'event-scroll';
+    }
+
+    /**
+     * Определяем, за какими атрибутами необходимо наблюдать.
+     * 
+     * @return array Массив атрибутов.
+     */
+    static get observedAttributes() {
+        return ['url'];
+    }
+
+    /**
+     * Следим за изменениями этих атрибутов и отвечаем соответственно.
+     *
+     * @param string name Имя атрибута, в котором произошли изменения.
+     * @param string oldVal Старое значение атрибута, т.е. до его изменения.
+     * @param string newVal Новое значение атрибута.
+     * @return void
+     *
+     * !!! При первой загрузке страницы, если атрибуты установлены в веб-компоненте, происходит
+     *     срабатывание данной функции, при этом "oldVal=null", а "newVal" будет равно значению,
+     *     установленному в веб-компоненте.
+     */
+    attributeChangedCallback(name, oldVal, newVal) {
+        if ( oldVal ) {
+            switch ( name ) {// При обновление значений.
+                case 'url':// Для атрибута 'url'.
+                    if (this.eventScroll()) break;
+                    this.timer(
+                        this.query(
+                            this.checkMode()
+                        )
+                    );
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Браузер вызывает этот метод при добавлении элемента в документ.
+     * (может вызываться много раз, если элемент многократно добавляется/удаляется).
+     */
+    connectedCallback() {
+        if (this.eventScroll()) return;
+        if (this.mode == 'html') {
+            this.timer(
+                this.checkMode()
+            );
+        }
+        if (this.mode == 'trubber') {
+            this.timer(
+                this.query(
+                    this.checkMode()
+                )
+            );
+        }
+    }
+
+    /**
+     * Проверка атрибута 'mode' и установка соответствующего класса.
+     *
+     * @return void
+     */
+    checkMode() {
+        if (
+            this.classList.contains('paste_replace') == false &&
+            this.classList.contains('paste_trubber') == false
+        ) {
+            if (this.mode == 'html') this.classList.add('paste_replace');
+            if (this.mode == 'trubber') this.classList.add('paste_trubber');
+        }
+        else {
+            if (this.mode == 'html') {
+                if (this.classList.contains('paste_trubber')) {
+                    this.classList.remove('paste_trubber');
+                }
+                if (this.classList.contains('paste_replace') == false) {
+                    this.classList.add('paste_replace');
+                }
+            }
+            if (this.mode == 'trubber') {
+                if (this.classList.contains('paste_trubber')) {
+                    this.classList.remove('paste_trubber');
+                    this.classList.add('paste_replace');
+                }
+                else if (this.classList.contains('paste_replace')) {
+                    this.classList.remove('paste_replace');
+                    this.classList.add('paste_trubber');
+                }
+            }
+        }
+    }
+
+    /**
+     * Производит замену элемента с классом 'paste__replace' на новый html-элемент.
+     * 
+     * @param string html
+     * @return void
+     */
+    replaceHTML(html) {
+        if (this.multiple == 'true') {
+            let arrSeparator = html.split('<separator>');
+            let i = 1;
+            for (let key in arrSeparator) {
+                let replace = this.querySelector('.paste__replace' + i);
+                replace.outerHTML = arrSeparator[key];
+                i++;
+            }
+        }
+        else if (this.multiple == 'false') {
+            let replace = this.querySelector('.paste__replace');
+            replace.outerHTML = html;
+        }
+    }
+
+    /**
+     * AJAX-запрос.
+     *
+     * @return void
+     */
+    query() {
+        if (this.checkUrl() == 1 || this.checkUrl() == 3) return;
+        let self = this;
+        Ajax.connect({
+            url: self.url,
+            success: function(html) {
+                self.timer(
+                    self.resetTimerId(
+                        self.checkMode(
+                            self.replaceHTML(
+                                self.moveTagsScript(html)
+                            )
+                        )
+                    )
+                );
+            },
+            error: function(status, statusText) {},
+            errorConnect: function() {},
+        });
+    }
+
+    /**
+     * Запускает таймер.
+     *
+     * @return void
+     */
+    timer() {
+        let self = this;
+        if (this.timeout > 0) {
+            if (this.timerId == null) {
+                this.timerId = setTimeout(
+                    function() {
+                        self.query(self.checkMode());
+                    }, this.timeout
+                );
+            }
+        }
+    }
+
+    /**
+     * Обнуляет timerId.
+     *
+     * @return void
+     */
+    resetTimerId() {
+        this.timerId = null;
+    }
+
+    /**
+     * Переносит теги "<script>" в шапку страницы (формирует их вновь из js-кода), удаляя теги
+     * "<script>" в переданной переменной "html".
+     * 
+     * @param  string html Html-код, полученный от AJAX-запроса.
+     * @return string Html-код без тегов "<script>".
+     */
+    moveTagsScript(html) {
+        let arr = html.split('</script>');
+        if (arr.length == 1) return html;
+        let nameWebComp;
+        for (let i = 0; i < arr.length - 1; i++) {
+            let results = arr[i].matchAll(/(?<nameattr>\w+)=(\"|\'){1}(?<valueattr>(\/|\w|\#|\.|\-|\?)+)(\"|\'){1}/g);
+            let scripts = document.createElement('script');
+            for (let result of results) {
+                if (result.groups.nameattr == 'src') {
+                    nameWebComp = result.groups.valueattr.match(/(?<webcompname>(\w|\#|\-|\?)+)\.js$/).groups.webcompname;
+                }
+                scripts[result.groups.nameattr] = result.groups.valueattr;
+            }
+            if (!customElements.get('wc-' + nameWebComp)) {
+                this.myhead.append(scripts);
+            }
+        }
+        return arr[arr.length - 1];
+    }
+
+    /**
+     * Проверяет атрибут 'url' и возвращает в зависимости от содержимого код:
+     *      1 - атрибут содержит '#адрес';
+     *      2 - атрибут содержит только 'адрес';
+     *      3 - атрибут содержит только хеш '#'.
+     *
+     * @return int Код проверки.
+     */
+    checkUrl() {
+        let url, hesh, result = this.url.match(/^(?<hesh>\#{1})?(?<adress>(\w|\-|\/|\?)+)?/);
+        if (result.groups.adress == undefined) url = 0;
+        else {
+            url = result.groups.adress.length;
+        }
+        if (result.groups.hesh == undefined) hesh = 0;
+        else {
+            hesh = result.groups.hesh.length;
+        }
+        if (url > 0 && hesh > 0)  return 1;
+        if (url > 0 && hesh == 0) return 2;
+        if (url == 0 && hesh > 0) return 3;
+    }
+
+    /**
+     * Отслеживает появление элемента на странице.
+     *
+     * @return bool 'true' - элемент появился в окне браузера, 'false' - не появлялся.
+     */
+    isVisible() {
+        let elem = this.querySelector('.' + this.classscroll);
+        if (elem) {
+            let rect = elem.getBoundingClientRect();
+            return (
+                rect.top >= 0 &&
+                rect.left >= 0 &&
+                rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+                rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+            );
+        }
+    }
+
+    /**
+     * Если атрибут "url" содержит адрес вида "#адрес", устанавливает событие "scroll".
+     *
+     * @return bool 'true' - устанавлино событие scroll или в атрибуте url есть хеш, 'false' - атрибут
+     *              url не содержит хеша.
+     */
+    eventScroll() {
+        var myFunc = () => {
+            if (this.isVisible()) {
+                document.removeEventListener('scroll', myFunc);
+                this.url = this.url.slice(1);
+            }
+        }
+        if (this.checkUrl() == 1) {
+            if (this.isVisible()) {
+                this.url = this.url.slice(1);
+                return true;
+            }
+            else {
+                document.addEventListener('scroll', myFunc);
+                return true;
+            }
+        }
+        else return false;
+    }
+}

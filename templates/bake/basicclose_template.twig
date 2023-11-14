@@ -1,0 +1,133 @@
+/**
+ * Веб-компонент "{{ name|capitalize }}". Закрытая схема.
+ */
+
+import Template from './template.js';
+
+/**
+ * Класс {{ name|capitalize }}
+ */
+export default class {{ name|capitalize }} extends HTMLElement {
+
+    /**
+     * Конструктор.
+     */
+    constructor() {
+
+        super();
+
+        // Теневая модель:
+        this.root = this.attachShadow( {mode: 'open'} );
+
+        // Подключаем CSS:
+        this.root.innerHTML = Template.render();
+
+        // Выбираем одно из действий:
+        // Копируем с шаблона содержимое:
+        this.cloneContent();
+        // иначе все содержимое переносим в теневую модель, оставляя тег <template> пустым:
+        this.moveContent();
+
+        // Кэширование элементов компонента для теневой модели.
+        this.domShadow = Template.mapDomShadow( this.root );
+
+        // Кешируем значения.
+        // this.cashe = this.casheValue();
+    }
+
+    /**
+     * Клонируем с шаблона содержимое.
+     */
+    cloneContent() {
+        const template = this.dom.tagTempl;
+        if ( template != null ) {
+            const clone = template.content.cloneNode( true );
+            this.root.append( clone );
+        }
+    }
+
+    /**
+     * Все содержимое переносим в теневую модель, оставляя тег <template> пустым.
+     */
+    moveContent() {
+        const template = this.dom.tagTempl;
+        if ( template != null ) {
+            const fragment = document.createDocumentFragment();
+            fragment.append( template.content );
+            this.root.append( fragment );
+        }
+    }
+
+    /**
+     * Кеширование значений или объектов.
+     */
+    casheValue() {
+        return {
+            //myVal: 'Значение или объект',
+        }
+    }
+
+    /**
+     * Атрибут "url".
+     */
+    set url( val ) {
+        this.setAttribute( 'url', val );
+    }
+    get url() {
+        if ( this.hasAttribute( 'url' ) ) {
+            return this.getAttribute( 'url' );
+        }
+        else return {{ name|capitalize }}.DEFAULT_URL;
+    }
+    static get DEFAULT_URL() {
+        return false;
+    }
+
+    /**
+     * Определяем, за какими атрибутами необходимо наблюдать.
+     *
+     * @return array Массив атрибутов.
+     */
+    static get observedAttributes() {
+        //return ['Имя атрибута'];
+    }
+
+    /**
+     * Следим за изменениями этих атрибутов и отвечаем соответственно.
+     *
+     * @param string name Имя атрибута, в котором произошли изменения.
+     * @param string oldVal Старое значение атрибута, т.е. до его изменения.
+     * @param string newVal Новое значение атрибута.
+     * @return void
+     *
+     * !!! При первой загрузке страницы, если атрибуты установлены в веб-компоненте, происходит
+     *     срабатывание данной функции, при этом "oldVal=null", а "newVal" будет равно значению,
+     *     установленному в веб-компоненте.
+     */
+    attributeChangedCallback( name, oldVal, newVal ) {
+        switch( name ) {
+            case 'Имя атрибута':
+                // Выполняемый код.
+                break;
+            case 'Имя атрибута':
+            // Выполняемый код.
+            break;
+        }
+    }
+
+    /**
+     * Браузер вызывает этот метод при добавлении элемента в документ.
+     * (может вызываться много раз, если элемент многократно добавляется/удаляется).
+     */
+    connectedCallback() {
+        // СОБЫТИЯ:
+        // this.dom.valera.addEventListener('click', (e) => console.log(e.currentTarget));// Для примера.
+    }
+}
+
+/**
+ * Регистрация веб-компонента.
+ */
+if ( !customElements.get( 'wc-{{ name|lower }}' ) ) {
+    customElements.define( 'wc-{{ name|lower }}', {{ name|capitalize }} );
+}
