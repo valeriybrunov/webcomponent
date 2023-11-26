@@ -51,6 +51,11 @@ class ИмяКласса extends Paginator {
     }
 }
 ```
+
+Настройки (значения атрибутов):
+
+* `eventnextpage` - событие для продолжение пагинации: `click` - щелчок (по умолчанию) и `visibility` - при появление в окне браузера.
+
 Для работы пагинации необходимо подключить хелпер в файле `AppView.php`.
 
 ```php
@@ -74,7 +79,7 @@ public function initialize(): void
     <input name="page" type="hidden" value="...url">
 </div>
 
-<div class="paste__click">
+<div class="paste__click button">
     <div class="text">Смотреть ещё...</div>
     <div class="paste__trubber">...</div>
 </div>
@@ -82,7 +87,7 @@ public function initialize(): void
 
 Элемент с классом `paste__replace` будет заменён при каждом получении новой порции данных. Для продолжения пагинации необходимо, чтобы принятые данные содержали элемент с классом `paste__replace`. Последняя страница пагинации не должна содержать такой элемент.
 
-Сразу за элементом `paste__replace` должен идти элемент, содержащий класс `paste__click`. На этот элемент навешивается событие `click`, которое будет продолжать пагинацию.
+Если `eventnextpage=click`, то сразу за элементом `paste__replace` должен идти элемент, содержащий класс `paste__click`. На этот элемент навешивается событие `click`, которое будет продолжать пагинацию.
 
 Элемент с классом `paste__trubber` может идти как сразу после элемента `paste__click`, так и располагаться внутри него.
 
@@ -97,9 +102,23 @@ public function initialize(): void
 
 <?= $this->element('Webcomponent.replace') ?>
 
-<div class="paste__click">
+<div class="paste__click button">
     <div class="text">Смотреть ещё...</div>
     <div class="paste__trubber">...</div>
+</div>
+```
+
+Для `eventnextpage=visibility` элемент `paste__click` не нужен. Необходимо в вёрстку в самый конец добавить элемент-пустышку для отслеживания появления веб-компонента в окне браузера - `<div class="event-scroll"></div>`. 
+
+```html
+/**
+ * Здесь выводится html-вёрстка первой страницы пагинации.
+ */
+
+<?= $this->element('Webcomponent.replace') ?>
+
+    <div class="paste__trubber">...</div>
+	<div class="event-scroll"></div>
 </div>
 ```
 
