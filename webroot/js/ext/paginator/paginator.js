@@ -2,6 +2,7 @@
  * Расширяемый веб-компонент "Paginator". Открытая схема.
  */
 
+import Template from './template.js';
 import Paste from '../paste/paste.js';
 
 /**
@@ -15,6 +16,7 @@ export default class Paginator extends Paste {
     constructor() {
         super();
         this.classList.add('paginator');
+        this.insertAdjacentHTML( 'afterbegin', Template.render() );
     }
 
     /**
@@ -44,9 +46,12 @@ export default class Paginator extends Paste {
         if (this.eventnextpag == 'click') {
             this.url = '#';
             let pasteClick = this.querySelector('.paste__click');
-            pasteClick.addEventListener('click', (e) => this.transferUrl());
+            pasteClick.addEventListener('click', (e) => {
+                this.classList.add('paginator_click');
+                this.transferUrl();
+            });
         }
-        else if (this.eventnextpag == 'visibility') this.transferUrl('#');
+        if (this.eventnextpag == 'visibility') this.transferUrl('#');
         super.connectedCallback();
     }
 
@@ -63,11 +68,37 @@ export default class Paginator extends Paste {
     }
 
     /**
-     * После вставки данных от AJAX-запроса переносит значение скрытого поля в атрибут url.
+     * Для атрибута eventnextpag=visibility после вставки данных от AJAX-запроса переносит
+     * значение скрытого поля в атрибут url.
      *
      * @return void
      */
     success() {
-        if (this.eventnextpag == 'visibility') this.transferUrl('#');
+        if (this.eventnextpag == 'visibility') {
+            this.clearElements();
+            this.transferUrl('#');
+        }
+        if (this.eventnextpag == 'click') {
+            this.clearElements();
+            this.classList.remove('paginator_click');
+        }
+    }
+
+    /**
+     * Проверяет наличие скрытого поля внутри элемента с классом paste__replace и, если такое поле
+     * отсутствует удаляет элементы с классом paste__replace, paste__click и paste__trubber.
+     *
+     * @return void
+     */
+    clearElements() {
+        let input = this.querySelector('input[name="page"]');
+        if (!input) {
+            let replace = this.querySelector('.paste__replace');
+            let click = this.querySelector('.paste__click');
+            let trubber = this.querySelector('.paste__trubber');
+            if (replace) replace.outerHTML = '';
+            if (click) click.outerHTML = '';
+            if (trubber) trubber.outerHTML = '';
+        }
     }
 }

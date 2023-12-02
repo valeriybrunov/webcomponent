@@ -79,19 +79,21 @@ public function initialize(): void
     <input name="page" type="hidden" value="...url">
 </div>
 
-<div class="paste__click button">
+<div class="paste__click paginator__click button">
     <div class="text">Смотреть ещё...</div>
     <div class="paste__trubber">...</div>
 </div>
 ```
 
-Элемент с классом `paste__replace` будет заменён при каждом получении новой порции данных. Для продолжения пагинации необходимо, чтобы принятые данные содержали элемент с классом `paste__replace`. Последняя страница пагинации не должна содержать такой элемент.
+Элемент с классом `paste__replace` будет заменён при каждом получении новой порции данных. Для продолжения пагинации необходимо, чтобы принятые данные содержали элемент с классом `paste__replace`. 
 
-Если `eventnextpage=click`, то сразу за элементом `paste__replace` должен идти элемент, содержащий класс `paste__click`. На этот элемент навешивается событие `click`, которое будет продолжать пагинацию.
+Если `eventnextpage=click` (установлен по умолчанию), то сразу за элементом `paste__replace` должен идти элемент, содержащий класс `paste__click`. На этот элемент навешивается событие `click`, которое будет продолжать пагинацию.
 
 Элемент с классом `paste__trubber` может идти как сразу после элемента `paste__click`, так и располагаться внутри него.
 
 Элементы с классом `paste__click` и `paste__trubber` являются взаимоисключающие. Это значит, когда один элемент показывется - другой скрывается. В случае вставки последней страницы пагинации оба класса скрываются.
+
+Класс `paginator__click` и `paste__click` для правильной работы должны находиться на одном элементе.
 
 Для упрощения html-вёрстки веб-компонента с пагинацией, элемент с классом `paste__replace` заменяют элементом cakePHP:
 
@@ -102,7 +104,7 @@ public function initialize(): void
 
 <?= $this->element('Webcomponent.replace') ?>
 
-<div class="paste__click button">
+<div class="paste__click paginator__click button">
     <div class="text">Смотреть ещё...</div>
     <div class="paste__trubber">...</div>
 </div>
