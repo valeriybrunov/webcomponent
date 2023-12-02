@@ -141,9 +141,9 @@ if ($this->request->is('ajax')) return $this->render('/element/webcomp/ajax/myco
 ```text
 [element]-|
           +-[webcomp]-+
-					  |-mycomp.php
-					  |-[ajax]-+
-						 	   |-mycomp.php
+			|-mycomp.php
+			|-[ajax]-+
+					 |-mycomp.php
 ```
 
 Здесь появилась новая директория `ajax`, содержащая элементы CakePHP для AJAX-запросов и имеющих одноимённое название с элементами, определяющими внутреннее содержимое веб-компонента.
