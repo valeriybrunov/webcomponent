@@ -147,18 +147,18 @@ if ($this->request->is('ajax')) return $this->render('/element/webcomp/ajax/myco
 Для упрощения создания веб-компонентов с пагинацией применяют команду в терминале:
 
 ```
-$ bin/cake webcomp <name> -ajax
+$ bin/cake webcomp <name> -list
 ```
 
 или применяем краткую команду:
 
 ```
-$ bin/cake webcomp <name> -a
+$ bin/cake webcomp <name> -l
 ```
 
 Также можно применить и другие параметры при необходимости:
 
 ```
-$ bin/cake webcomp <name> -a -p -c
+$ bin/cake webcomp <name> -l -c
 ```
 

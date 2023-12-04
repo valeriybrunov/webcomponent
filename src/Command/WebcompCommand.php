@@ -39,6 +39,13 @@ class WebcompCommand extends Command
             'boolean' => true,
         ]);
 
+        // Опция "-list".
+        $parser->addOption('list', [
+            'help' => 'Создает файлы веб-компонента с файлами для пагинации.',
+            'short' => 'l',
+            'boolean' => true,
+        ]);
+
         return $parser;
     }
 
@@ -74,20 +81,50 @@ class WebcompCommand extends Command
 				$args->getOption('plugin')
 			);
         }
-        else {
-        	$this->createFiles($name,
-				[// Названия шаблонов для создания файлов.
-					['basic', 'template', 'test'], 'element',
-				],
-				[// Названия создаваемых файлов.
-					[$name.'.js', 'template.js', 'test.js'], $name.'.php',
-				],
-				[// Директории, где будут созданы файлы.
-					'webroot' . DS . 'js' . DS . 'webcomp' . DS . $name . DS,
-					'templates' . DS . 'element' . DS . 'webcomp' . DS,
-				],
-				$args->getOption('plugin')
-			);
+        else {// Для открытой схемы.
+            if ($args->getOption('list')) {
+                $this->createFiles($name,
+                    [// Названия шаблонов для создания файлов.
+                        ['basic', 'template', 'test'], 'elementlist', 'elementajax'
+                    ],
+                    [// Названия создаваемых файлов.
+                        [$name.'.js', 'template.js', 'test.js'], $name.'.php', $name.'.php',
+                    ],
+                    [// Директории, где будут созданы файлы.
+                        'webroot' . DS . 'js' . DS . 'webcomp' . DS . $name . DS,
+                        'templates' . DS . 'element' . DS . 'webcomp' . DS,
+                        'templates' . DS . 'element' . DS . 'webcomp' . DS . 'ajax' . DS,
+                    ],
+                    false
+                );
+
+                $io->setStyle('greentext', ['text' => 'green']);
+                $io->setStyle('boldik', ['text' => 'green', 'bold' => true]);
+
+                $io->hr();
+                $io->out("<greentext>Создан веб-компонент, содержащий пагинацию (листинг) </greentext><boldik>" . ucfirst($name) . "</boldik>");
+                $io->hr();
+                $io->out("<greentext>Не забудьте в конце действия контроллёра вставить код:</greentext>");
+                $io->out("<greentext>if (\$this->request->is('ajax')) return \$this->render('/element/webcomp/ajax/" . $name . "');</greentext>");
+                $io->hr();
+
+                return static::CODE_SUCCESS;
+            }
+            else {
+                $this->createFiles($name,
+                    [// Названия шаблонов для создания файлов.
+                        ['basic', 'template', 'test'], 'element',
+                    ],
+                    [// Названия создаваемых файлов.
+                        [$name.'.js', 'template.js', 'test.js'], $name.'.php',
+                    ],
+                    [// Директории, где будут созданы файлы.
+                        'webroot' . DS . 'js' . DS . 'webcomp' . DS . $name . DS,
+                        'templates' . DS . 'element' . DS . 'webcomp' . DS,
+                    ],
+                    $args->getOption('plugin')
+                );
+            }
         }
 
 		$io->setStyle('greentext', ['text' => 'green']);

@@ -1,0 +1,22 @@
+<?php
+/**
+ * Листинг данных для веб-компонента "{{ name|capitalize }}".
+ */
+?>
+
+<?php if (count($pag) > 0): ?>
+<?php
+  foreach ($pag as $key => $value) {
+		echo $value->name . '<br>';
+	}
+?>
+<?php else: ?>
+Нет данных.
+<?php endif; ?>
+
+<?php
+/**
+ * Элемент 'replace'.
+ */
+?>
+<?= $this->element('Webcomponent.replace') ?>
