@@ -56,7 +56,7 @@ describe("Тест расширяемого вэб-компонента Paginato
 
     });
 
-    describe(`Проверяем метод clearElements():`, function() {
+    describe(`Проверяем метод removeElements():`, function() {
 
     	beforeEach(() => {
     		paginator = new Paginator();
@@ -76,7 +76,7 @@ describe("Тест расширяемого вэб-компонента Paginato
 				</div>
 				<div class="paste__trubber">мой труббер</div>
         	`);
-        	paginator.clearElements();
+        	paginator.removeElements();
         	let input = paginator.querySelector('input[name="page"]');
         	let replace = paginator.querySelector('.paste__replace');
             let click = paginator.querySelector('.paste__click');
@@ -95,7 +95,7 @@ describe("Тест расширяемого вэб-компонента Paginato
 				</div>
 				<div class="paste__trubber">мой труббер</div>
         	`);
-        	paginator.clearElements();
+        	paginator.removeElements();
         	let input = paginator.querySelector('input[name="page"]');
         	let replace = paginator.querySelector('.paste__replace');
             let click = paginator.querySelector('.paste__click');

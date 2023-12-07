@@ -73,13 +73,13 @@ export default class Paginator extends Paste {
      *
      * @return void
      */
-    success() {
+    after() {
         if (this.eventnextpag == 'visibility') {
-            this.clearElements();
+            this.removeElements();
             this.transferUrl('#');
         }
         if (this.eventnextpag == 'click') {
-            this.clearElements();
+            this.removeElements();
             this.classList.remove('paginator_click');
         }
     }
@@ -90,7 +90,7 @@ export default class Paginator extends Paste {
      *
      * @return void
      */
-    clearElements() {
+    removeElements() {
         let input = this.querySelector('input[name="page"]');
         if (!input) {
             let replace = this.querySelector('.paste__replace');

@@ -240,12 +240,14 @@ export default class Paste extends HTMLElement {
         Ajax.connect({
             url: self.url,
             success: function(html) {
-                self.success(
+                self.after(
                     self.timer(
                         self.resetTimerId(
                             self.checkMode(
                                 self.replaceHTML(
-                                    self.moveTagsScript(html)
+                                    self.moveTagsScript(
+                                        self.before(html)
+                                    )
                                 )
                             )
                         )
@@ -258,11 +260,21 @@ export default class Paste extends HTMLElement {
     }
 
     /**
+     * Заглушка для замены в наследуемом коде. Срабатывает перед вставкой данных от AJAX-запроса.
+     *
+     * @param html html-код от AJAX-запроса.
+     * @return void
+     */
+    before(html) {
+        return html;
+    }
+
+    /**
      * Заглушка для замены в наследуемом коде. Срабатывает после вставки данных от AJAX-запроса.
      *
      * @return void
      */
-    success() {}
+    after() {}
 
     /**
      * Запускает таймер.
