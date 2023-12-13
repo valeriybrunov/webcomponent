@@ -77,6 +77,57 @@ describe("Тест расширяемого вэб-компонента Progress
             assert.equal(progress.totalLoad == rnd1 + rnd2, true, `Добавление атрибутов не произошло!`);
         });
     });
+
+    describe(`Проверяем метод calculatingLimit():`, function() {
+
+        beforeEach(() => {
+            progress = new Progress();
+        });
+
+        afterEach(() => {
+            progress = null;
+        });
+
+        it(`Имитируем поочерёдность загрузки файлов.`, function() {
+            progress.limit = 0;
+            let prevProgressBarValue = 50;
+            let head = document.getElementsByTagName('head')[0];
+            let scripts = 2;
+            let imgs = 5;
+            progress.totalLoad = scripts + imgs;
+            for (var i = 0; i < scripts; i++) {
+                let script = document.createElement('script');
+                script.src = '#';
+                script.type = 'text/javascript';
+                script.setAttribute('loadfile', '0');
+                head.append(script);
+            }
+            for (var i = 0; i < imgs; i++) {
+                let img = document.createElement('img');
+                img.src = '#';
+                img.setAttribute('loadfile', '0');
+                progress.append(img);
+            }
+            for (var i = 0; i < imgs; i++) {
+                let image = progress.querySelector('img[loadfile="0"]');
+                if (image) {
+                    image.setAttribute('loadfile', '1');
+                    progress.calculatingLimit();
+                    assert.equal(progress.limit > prevProgressBarValue, true, `Неправильный подсчёт тегов img!`);
+                    prevProgressBarValue = progress.limit;
+                }
+            }
+            for (var i = 0; i < scripts; i++) {
+                let src = head.querySelector('script[loadfile="0"]');
+                if (src) {
+                    src.setAttribute('loadfile', '1');
+                    progress.calculatingLimit();
+                    assert.equal(progress.limit > prevProgressBarValue, true, `Неправильный подсчёт тегов script!`);
+                    prevProgressBarValue = progress.limit;
+                }
+            }
+        });
+    });
 });
 
 /**

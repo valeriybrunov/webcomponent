@@ -17,16 +17,7 @@ export default class Progress extends Paste {
         super();
         this.classList.add('progress');
         this.insertAdjacentHTML( 'afterbegin', Template.render() );
-        this.cashe = this.casheValue();
-    }
-
-    /**
-     * Кеширование значений или объектов.
-     */
-    casheValue() {
-        return {
-            head: document.getElementsByTagName('head')[0],
-        }
+        this.dom = Template.mapDom( this );
     }
 
     /**
@@ -35,6 +26,8 @@ export default class Progress extends Paste {
      * @return void
      */
     reset() {
+        this.checkMode();
+        this.totalLoad = 0;// Общее количество файлов, загрузку которых необходимо отследить.
         this.currentValue = 0;// Текущее значение прогресс-бара для отображения.
         this.valueSlow = 0;// Значение "медленного" прогресс-бара.
         this.valueFast = 0;// Значение "быстрого" прогресс-бара.
@@ -65,6 +58,11 @@ export default class Progress extends Paste {
     slow() {
         if (this.valueSlow < 100) this.valueSlow++;
         this.moveProgress();
+        if (this.valueSlow == 100) {
+            // Указать, что страница не загрузилась!!!
+            return;
+        }
+        if (this.currentValue >= 50) this.calculatingLimit();
         if (this.valueSlow < 100 && this.currentValue < 100) setTimeout(this.slow, 30);
     }
 
@@ -82,9 +80,26 @@ export default class Progress extends Paste {
     }
 
     /**
-     * AJAX-запрос.
+     * Расчитывет значение this.limit - процент загрузки страницы.
      *
      * @return void
+     */
+    calculatingLimit() {
+        let notLoadJs = this.dom.head.querySelectorAll('script[loadfile=\"0\"]');
+        let notLoadImg = this.querySelectorAll('img[loadfile=\"0\"]');
+        let notLoad = notLoadJs.length + notLoadImg.length;
+        let countLoad = this.totalLoad - notLoad;
+        if (countLoad == this.totalLoad) this.limit = 100;
+        else {
+            this.limit = Math.floor((50/this.totalLoad)*countLoad + 50);
+        }
+    }
+
+    /**
+     * Вставляет необходимые атрибуты в теги '<img>' и '<script>'.
+     *
+     * @param string html Html-код, полученный от AJAX-запроса.
+     * @return string Строка с добавленными атрибутами.
      */
     before(html) {
         const replaceScript = '<script loadfile="0" onload="this.setAttribute(\'loadfile\', \'1\')"';
@@ -93,5 +108,32 @@ export default class Progress extends Paste {
         html = html.replaceAll('<img', replaceImg);
         this.totalLoad = html.split(replaceScript).length + html.split(replaceImg).length - 2;
         return html;
+    }
+
+    /**
+     * AJAX-запрос.
+     *
+     * @return void
+     */
+    query() {
+        if (this.checkUrl() == 1 || this.checkUrl() == 3) return;
+        let self = this;
+        Ajax.connect({
+            url: self.url,
+            beforeSend: function() {
+                self.slow();
+            },
+            success: function(html) {
+                this.limit = 50;
+                self.fast();
+                self.replaceHTML(
+                    self.moveTagsScript(
+                        self.before(html)
+                    )
+                )
+            },
+            error: function(status, statusText) {},
+            errorConnect: function() {},
+        });
     }
 }
