@@ -16,8 +16,8 @@ export default class Progress extends Paste {
     constructor() {
         super();
         this.classList.add('progress');
-        this.insertAdjacentHTML( 'afterbegin', Template.render() );
-        this.dom = Template.mapDom( this );
+        this.insertAdjacentHTML('afterbegin', Template.render());
+        this.dom = Template.mapDom(this);
     }
 
     /**
@@ -57,7 +57,7 @@ export default class Progress extends Paste {
      */
     slow() {
         if (this.valueSlow < 100) this.valueSlow++;
-        this.moveProgress();
+        this.moveProgressBar();
         if (this.valueSlow == 100) {
             // Указать, что страница не загрузилась!!!
             return;
@@ -75,7 +75,7 @@ export default class Progress extends Paste {
         if (this.valueFast < 100) {
             if (this.valueFast < this.limit) this.valueFast++;
         }
-        this.moveProgress();
+        this.moveProgressBar();
         if (this.valueFast < 100 && this.currentValue < 100) setTimeout(this.fast, 5);
     }
 
