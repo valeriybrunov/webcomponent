@@ -31,7 +31,8 @@ export default class Progress extends Paste {
         this.currentValue = 0;// Текущее значение прогресс-бара для отображения.
         this.valueSlow = 0;// Значение "медленного" прогресс-бара.
         this.valueFast = 0;// Значение "быстрого" прогресс-бара.
-        this.limit = 0;
+        this.limit = 0;// Динамически изменяемое значение в %, к которому должны стремиться
+                       // достигнуть методы смещения прогресс-бара: fast() и slow().
         this.dom.tagProgressBar.setAttribute('style', `width:0%`);
     }
 

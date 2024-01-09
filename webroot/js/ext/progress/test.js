@@ -145,7 +145,7 @@ describe("Тест расширяемого вэб-компонента Progress
             progress.dom.tagProgressBar = progress.querySelector('.progress__bar');
             progress.reset();
             sinon.stub(progress, 'reset').callsFake(function myReset() {
-                assert.equal(progress.currentValue == 100, true, ``);
+                assert.equal(progress.currentValue == 100, true, `Нет достижения 100%!`);
             });
             sinon.stub(progress, 'calculatingLimit').callsFake(function myCalLimit() {
                 return;
@@ -167,8 +167,21 @@ describe("Тест расширяемого вэб-компонента Progress
         afterEach(() => {
             progress = null;
         });
-    
-        it(`Описание`, function() {});
+
+        it(`Прогоняем метод fast().`, function() {
+            let html = '<div class="progress__bar"></div>';
+            progress.insertAdjacentHTML('beforeend', `<div class="progress__bar"></div>`);
+            progress.dom.tagProgressBar = progress.querySelector('.progress__bar');
+            progress.reset();
+            sinon.stub(progress, 'reset').callsFake(function myReset() {
+                assert.equal(progress.currentValue == 100, true, `Нет достижения 100%!`);
+            });
+            let clock = sinon.useFakeTimers({toFake:["setTimeout"]});
+            sinon.stub(clock, 'setTimeout').callsFake(function myTime() {
+                progress.fast();
+            });
+            
+        });
     });
 });
 

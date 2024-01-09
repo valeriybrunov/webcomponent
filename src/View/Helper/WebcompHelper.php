@@ -56,13 +56,13 @@ class WebcompHelper extends Helper
     public function __call($name, array $arr): string
     {
         return $this->Html->script($this->namePlugin($name) . 'webcomp' . DS . $this->clearNameWebcomp($name) . DS . $this->clearNameWebcomp($name), ['block' => true, 'type' => 'module']) .
-                '<wc-' . $this->clearNameWebcomp( $name ) . $this->addAttr($arr) . '>' .
+                '<' . ($arr[0]['tag'] ?? 'div') . '-' . $this->clearNameWebcomp( $name ) . $this->addAttr($arr) . '>' .
                 $this->contentWebcomp(
                     $this->nameWebcomp($name),
                     $arr[0]['view'] ?? $this->getConfig('defaultView'),
                     $arr[0]['data'] ?? [],
                     $arr[0]['options'] ?? []
-                ) . '</wc-' . $this->clearNameWebcomp($name) . '>';
+                ) . '</' . ($arr[0]['tag'] ?? 'div') . '-' . $this->clearNameWebcomp($name) . '>';
     }
 
     /**
