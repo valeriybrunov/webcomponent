@@ -14,12 +14,12 @@ use Cake\Core\Plugin;
  */
 class WebcompCommand extends Command
 {
-	public static function getDescription(): string
+    public static function getDescription(): string
     {
         return 'Создавайте веб-компоненты при помощи команд в консоли.';
     }
 
-	protected function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
+    protected function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
     {
         $parser->addArgument('name', [
             'help' => 'Имя веб-компонента.',
@@ -46,6 +46,13 @@ class WebcompCommand extends Command
             'boolean' => true,
         ]);
 
+        // Опция "-copy".
+        $parser->addOption('extcopy', [
+            'help' => 'Копирует расширяемый веб-компонент в директорию "webroot".',
+            'short' => 'e',
+            'boolean' => true,
+        ]);
+
         return $parser;
     }
 
@@ -57,29 +64,29 @@ class WebcompCommand extends Command
         $name = strtolower($args->getArgument('name'));
 
         if (empty($name)) {
-        	$io->error('Не задано имя веб-компонента!');
-        	$this->abort();
+            $io->error('Не задано имя веб-компонента!');
+            $this->abort();
         }
 
         if (!preg_match( '/^[a-zA-Z][a-zA-Z0-9]*$/', $name) ) {
-        	$io->error('В название веб-компонента указаны недопустимые символы!');
-        	$this->abort();
+            $io->error('В название веб-компонента указаны недопустимые символы!');
+            $this->abort();
         }
 
         if ($args->getOption('close')) {// Для закрытой схемы.
-        	$this->createFiles($name,
-				[// Названия шаблонов для создания файлов.
-					['basicclose', 'template', 'test'], 'element',
-				],
-				[// Названия создаваемых файлов.
-					[$name.'.js', 'template.js', 'test.js'], $name.'.php',
-				],
-				[// Директории, где будут созданы файлы.
-					'webroot' . DS . 'js' . DS . 'webcomp' . DS . $name . DS,
-					'templates' . DS . 'element' . DS . 'webcomp' . DS,
-				],
-				$args->getOption('plugin')
-			);
+            $this->createFiles($name,
+                [// Названия шаблонов для создания файлов.
+                    ['basicclose', 'template', 'test'], 'element',
+                ],
+                [// Названия создаваемых файлов.
+                    [$name.'.js', 'template.js', 'test.js'], $name.'.php',
+                ],
+                [// Директории, где будут созданы файлы.
+                    'webroot' . DS . 'js' . DS . 'webcomp' . DS . $name . DS,
+                    'templates' . DS . 'element' . DS . 'webcomp' . DS,
+                ],
+                $args->getOption('plugin')
+            );
         }
         else {// Для открытой схемы.
             if ($args->getOption('list')) {
@@ -110,6 +117,35 @@ class WebcompCommand extends Command
 
                 return static::CODE_SUCCESS;
             }
+            elseif ($args->getOption('extcopy')) {
+                switch ($name) {
+                    case 'paste':
+                        $this->createFiles($name,
+                            [// Названия шаблонов для создания файлов.
+                                ['extpaste', 'extpastetemplate', 'extpastetest'],
+                            ],
+                            [// Названия создаваемых файлов.
+                                [$name.'.js', 'template.js', 'test.js'],
+                            ],
+                            [// Директории, где будут созданы файлы.
+                                'webroot' . DS . 'js' . DS . 'webcomp' . DS . 'ext' . DS . $name . DS,
+                            ],
+                            false
+                        );
+                        break;
+                    case 'paginator':
+                        break;
+                    case 'progress':
+                        break;
+                    default:
+                        $io->setStyle('greentext', ['text' => 'red']);
+                        $io->setStyle('boldik', ['text' => 'red', 'bold' => true]);
+                        $io->hr();
+                        $io->out("<greentext>Расширяемого веб-компонента </greentext><boldik>" . ucfirst($name) . "</boldik><greentext> не существует!</greentext>");
+                        $io->hr();
+                        return static::CODE_SUCCESS;
+                }
+            }
             else {
                 $this->createFiles($name,
                     [// Названия шаблонов для создания файлов.
@@ -127,7 +163,7 @@ class WebcompCommand extends Command
             }
         }
 
-		$io->setStyle('greentext', ['text' => 'green']);
+        $io->setStyle('greentext', ['text' => 'green']);
         $io->setStyle('boldik', ['text' => 'green', 'bold' => true]);
 
         $io->hr();
@@ -151,29 +187,29 @@ class WebcompCommand extends Command
      */
     public function createFiles( $name, $nameTemplateFile, $nameCreateFile, $dir, $plugin = false ): void
     {
-    	$newFile = new \Webcomponent\Command\Bake\NewfileCommand();
+        $newFile = new \Webcomponent\Command\Bake\NewfileCommand();
 
-    	foreach ($dir as $key => $value) {
+        foreach ($dir as $key => $value) {
 
-    		if ($plugin) $path = '..' . DS . 'plugins' . DS . ucfirst($name) . DS;
-    		else $path = '..' . DS;
+            if ($plugin) $path = '..' . DS . 'plugins' . DS . ucfirst($name) . DS;
+            else $path = '..' . DS;
 
-    		$newFile->pathFragment = $path . $value;
+            $newFile->pathFragment = $path . $value;
 
-    		if (is_array($nameTemplateFile[$key])) {
-    			foreach ($nameTemplateFile[$key] as $key2 => $value2) {
-    				$newFile->nameTemplateReader = $value2;
-    				$newFile->templateName = 'Webcomponent.' . $value2 . 'Template';
-    				$newFile->fileNameSave = $nameCreateFile[$key][$key2];
-    				$this->executeCommand($newFile, [$name]);
-    			}
-    		}
-    		if (is_string($nameTemplateFile[$key])) {
-    			$newFile->nameTemplateReader = $nameTemplateFile[$key];
-    			$newFile->templateName = 'Webcomponent.' . $nameTemplateFile[$key] . 'Template';
-    			$newFile->fileNameSave = $nameCreateFile[$key];
-    			$this->executeCommand($newFile, [$name]);
-    		}
-    	}
+            if (is_array($nameTemplateFile[$key])) {
+                foreach ($nameTemplateFile[$key] as $key2 => $value2) {
+                    $newFile->nameTemplateReader = $value2;
+                    $newFile->templateName = 'Webcomponent.' . $value2 . 'Template';
+                    $newFile->fileNameSave = $nameCreateFile[$key][$key2];
+                    $this->executeCommand($newFile, [$name]);
+                }
+            }
+            if (is_string($nameTemplateFile[$key])) {
+                $newFile->nameTemplateReader = $nameTemplateFile[$key];
+                $newFile->templateName = 'Webcomponent.' . $nameTemplateFile[$key] . 'Template';
+                $newFile->fileNameSave = $nameCreateFile[$key];
+                $this->executeCommand($newFile, [$name]);
+            }
+        }
     }
 }
