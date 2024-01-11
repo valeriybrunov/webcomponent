@@ -24,12 +24,12 @@ describe("Тест расширяемого вэб-компонента Progress
 
     describe(`Проверяем метод before():`, function() {
 
-    	beforeEach(() => {
-    		progress = new Progress();
-    	});
+      beforeEach(() => {
+        progress = new Progress();
+      });
 
         afterEach(() => {
-        	progress = null;
+          progress = null;
         });
 
         it(`Вставка атрибутов 'loadfile' и 'onload' в тег '<script>'.`, function() {

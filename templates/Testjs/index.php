@@ -13,5 +13,5 @@
  * Файл с тестами.
  */
 ?>
-<?= $this->Html->script( 'webcomp' . DS . $dir . DS . 'test.js', ['block' => 'testblock', 'type' => 'module'] ) ?>
+<?= $this->Html->script( 'webcomp' . DS . 'ext' . DS . $dir . DS . 'test.js', ['block' => 'testblock', 'type' => 'module'] ) ?>
 <div id="test"></div>

@@ -22,26 +22,4 @@ class TestjsController extends AppController
         $this->viewBuilder()->setLayout('Webcomponent.test');
         $this->set( 'dir', $dir );
     }
-
-    /**
-     * Plugin method
-     *
-     * @return \Cake\Http\Response|null|void Renders view
-     */
-    public function plugin( $dir )
-    {
-        $this->viewBuilder()->setLayout('Webcomponent.test');
-        $this->set( 'dir', $dir );
-    }
-
-    /**
-     * Webcomponent method
-     *
-     * @return \Cake\Http\Response|null|void Renders view
-     */
-    public function webcomponent( $dir )
-    {
-        $this->viewBuilder()->setLayout('Webcomponent.test');
-        $this->set( 'dir', $dir );
-    }
 }

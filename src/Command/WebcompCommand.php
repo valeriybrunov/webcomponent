@@ -25,31 +25,38 @@ class WebcompCommand extends Command
             'help' => 'Имя веб-компонента.',
         ]);
 
-        // Опция "-plugin".
+        // Опция "--plugin".
         $parser->addOption('plugin', [
             'help' => 'Создает в плагине файлы веб-компонента.',
             'short' => 'p',
             'boolean' => true,
         ]);
 
-        // Опция "-close".
+        // Опция "--close".
         $parser->addOption('close', [
             'help' => 'Создает файлы веб-компонента для закрытой схемы.',
             'short' => 'c',
             'boolean' => true,
         ]);
 
-        // Опция "-list".
+        // Опция "--list".
         $parser->addOption('list', [
             'help' => 'Создает файлы веб-компонента с файлами для пагинации.',
             'short' => 'l',
             'boolean' => true,
         ]);
 
-        // Опция "-copy".
+        // Опция "--extcopy".
         $parser->addOption('extcopy', [
-            'help' => 'Копирует расширяемый веб-компонент в директорию "webroot".',
+            'help' => 'Копирует расширяемый веб-компонент в директорию "webroot/js/webcomp/ext/имяРасширВебКомп/файлы".',
             'short' => 'e',
+            'boolean' => true,
+        ]);
+
+        // Опция "--libcopy".
+        $parser->addOption('libcopy', [
+            'help' => 'Копирует библиотеку в директорию "webroot/js/webcomp/lib/имяБиблиотеки.js".',
+            'short' => 'b',
             'boolean' => true,
         ]);
 
@@ -134,14 +141,63 @@ class WebcompCommand extends Command
                         );
                         break;
                     case 'paginator':
+                        $this->createFiles($name,
+                            [// Названия шаблонов для создания файлов.
+                                ['extpaginator', 'extpaginatortemplate', 'extpaginatortest'],
+                            ],
+                            [// Названия создаваемых файлов.
+                                [$name.'.js', 'template.js', 'test.js'],
+                            ],
+                            [// Директории, где будут созданы файлы.
+                                'webroot' . DS . 'js' . DS . 'webcomp' . DS . 'ext' . DS . $name . DS,
+                            ],
+                            false
+                        );
                         break;
                     case 'progress':
+                        $this->createFiles($name,
+                            [// Названия шаблонов для создания файлов.
+                                ['extprogress', 'extprogresstemplate', 'extprogresstest'],
+                            ],
+                            [// Названия создаваемых файлов.
+                                [$name.'.js', 'template.js', 'test.js'],
+                            ],
+                            [// Директории, где будут созданы файлы.
+                                'webroot' . DS . 'js' . DS . 'webcomp' . DS . 'ext' . DS . $name . DS,
+                            ],
+                            false
+                        );
                         break;
                     default:
                         $io->setStyle('greentext', ['text' => 'red']);
                         $io->setStyle('boldik', ['text' => 'red', 'bold' => true]);
                         $io->hr();
                         $io->out("<greentext>Расширяемого веб-компонента </greentext><boldik>" . ucfirst($name) . "</boldik><greentext> не существует!</greentext>");
+                        $io->hr();
+                        return static::CODE_SUCCESS;
+                }
+            }
+            elseif ($args->getOption('libcopy')) {
+                switch ($name) {
+                    case 'ajax':
+                        $this->createFiles($name,
+                            [// Названия шаблонов для создания файлов.
+                                ['libajax'],
+                            ],
+                            [// Названия создаваемых файлов.
+                                [$name.'.js'],
+                            ],
+                            [// Директории, где будут созданы файлы.
+                                'webroot' . DS . 'js' . DS . 'webcomp' . DS . 'lib' . DS,
+                            ],
+                            false
+                        );
+                        break;
+                    default:
+                        $io->setStyle('greentext', ['text' => 'red']);
+                        $io->setStyle('boldik', ['text' => 'red', 'bold' => true]);
+                        $io->hr();
+                        $io->out("<greentext>Библиотеки </greentext><boldik>" . ucfirst($name) . "</boldik><greentext> не существует!</greentext>");
                         $io->hr();
                         return static::CODE_SUCCESS;
                 }

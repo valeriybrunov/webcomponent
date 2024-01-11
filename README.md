@@ -27,7 +27,7 @@
 Рекомендуемый способ установки пакетов composer - это:
 
 ```
-composer require valeriy-brunov/webcomponent
+composer require valeriybrunov/webcomponent
 composer dumpautoload
 bin/cake plugin load Webcomponent
 ```
