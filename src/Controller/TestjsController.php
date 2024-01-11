@@ -22,4 +22,13 @@ class TestjsController extends AppController
         $this->viewBuilder()->setLayout('Webcomponent.test');
         $this->set( 'dir', $dir );
     }
+
+    /**
+     *
+     */
+    public function ext( $dir )
+    {
+        $this->viewBuilder()->setLayout('Webcomponent.test');
+        $this->set( 'dir', $dir );
+    }
 }

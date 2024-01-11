@@ -49,6 +49,17 @@ class WebcomponentPlugin extends BasePlugin
                 $builder->fallbacks();
             }
         );
+        $routes->plugin(
+            'Webcomponent',
+            ['path' => '/webcomp/ext'],
+            function (RouteBuilder $builder) {
+                $builder->connect('/{dir}', [
+                    'controller' => 'Testjs',
+                    'action' => 'ext']
+                )->setPass(['dir']);
+                $builder->fallbacks();
+            }
+        );
         parent::routes($routes);
     }
 
