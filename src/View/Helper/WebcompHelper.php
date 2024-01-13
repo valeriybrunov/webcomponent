@@ -55,7 +55,7 @@ class WebcompHelper extends Helper
      */
     public function __call($name, array $arr): string
     {
-        return $this->Html->script($this->namePlugin($name) . 'webcomp' . DS . $this->clearNameWebcomp($name) . DS . $this->clearNameWebcomp($name), ['block' => true, 'type' => 'module']) .
+        return $this->Html->script( 'webcomp' . DS . $this->clearNameWebcomp($name) . DS . $this->clearNameWebcomp($name), ['block' => true, 'type' => 'module']) .
                 '<' . ($arr[0]['tag'] ?? 'div') . '-' . $this->clearNameWebcomp( $name ) . $this->addAttr($arr) . '>' .
                 $this->contentWebcomp(
                     $this->nameWebcomp($name),
@@ -107,13 +107,14 @@ class WebcompHelper extends Helper
      * @param  string $name Имя веб-компонента из $this->Webcomp->имяВебКомпонента().
      * @return string
      */
-    public function namePlugin($name): string
+    /*public function namePlugin($name): string
     {
         if (mb_substr_count($name, '_') == 1) {
             return explode('_', $name)[0] . '.';
         }
         else return '';
-    }
+    }*/
+
     /**
      * Формирует url загрузки для элемента или ячейки.
      *
