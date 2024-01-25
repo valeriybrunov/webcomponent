@@ -1,0 +1,51 @@
+/**
+ * Веб-компонент "{{ name|capitalize }}". Открытая схема.
+ */
+
+import Template from './template.js';
+
+/**
+ * Класс {{ name|capitalize }}
+ */
+export default class {{ name|capitalize }} extends Paste {
+
+    /**
+     * Ваш код.
+     */
+
+    /**
+     * Определяем, за какими атрибутами необходимо наблюдать.
+     * 
+     * @return array Массив атрибутов.
+     */
+    static get observedAttributes() {
+        return [...super.observedAttributes, 'др. значения массива'];
+    }
+
+    /**
+     * Следим за изменениями этих атрибутов и отвечаем соответственно.
+     */
+    attributeChangedCallback( name, oldVal, newVal ) {
+        super.attributeChangedCallback( name, oldVal, newVal );
+        /**
+         * Ваш код.
+         */
+    }
+
+    /**
+     * Браузер вызывает этот метод при добавлении элемента в документ.
+     * (может вызываться много раз, если элемент многократно добавляется/удаляется).
+     */
+    connectedCallback() {
+        super.connectedCallback();
+        // СОБЫТИЯ:
+        // this.dom.valera.addEventListener('click', (e) => console.log(e.currentTarget));// Для примера.
+    }
+}
+
+/**
+ * Регистрация веб-компонента.
+ */
+if ( !customElements.get( 'wc-{{ name|lower }}' ) ) {
+    customElements.define( 'wc-{{ name|lower }}', {{ name|capitalize }} );
+}

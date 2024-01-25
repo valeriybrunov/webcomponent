@@ -9,54 +9,81 @@ use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Core\Plugin;
 
+use Webcomponent\Command\Bake\Mycommands\MyCommands;
+
 /**
  * Webcomp command.
  */
 class WebcompCommand extends Command
 {
+    /**
+     * Описание.
+     */
     public static function getDescription(): string
     {
-        return 'Создавайте веб-компоненты при помощи команд в консоли.';
+        return 'Создавайте заполняемые шаблоны веб-компонентов при помощи команд в консоли.';
     }
 
+    /**
+     * Парсер.
+     */
     protected function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
     {
+        /***************************************************************
+         *                      Аргументы.
+         ***************************************************************/
+
         $parser->addArgument('name', [
             'help' => 'Имя веб-компонента.',
         ]);
 
+        $parser->addArgument('name2', [
+            'help' => 'Имя второго веб-компонента.',
+        ]);
+
+        /***************************************************************
+         *                      Опции.
+         ***************************************************************/
+
         // Опция "--plugin".
         $parser->addOption('plugin', [
-            'help' => 'Создает в плагине файлы веб-компонента.',
+            'help' => 'Создает в плагине файлы веб-компонента. Может указываться совместно с другими опциями.',
             'short' => 'p',
             'boolean' => true,
         ]);
 
         // Опция "--close".
         $parser->addOption('close', [
-            'help' => 'Создает файлы веб-компонента для закрытой схемы.',
+            'help' => 'Создает файлы веб-компонента для закрытой схемы. Может указываться совместно с другими опциями.',
             'short' => 'c',
             'boolean' => true,
         ]);
 
         // Опция "--list".
         $parser->addOption('list', [
-            'help' => 'Создает файлы веб-компонента с файлами для пагинации.',
+            'help' => 'Создает веб-компонент с файлами для пагинации.',
             'short' => 'l',
             'boolean' => true,
         ]);
 
-        // Опция "--extcopy".
-        $parser->addOption('extcopy', [
-            'help' => 'Копирует расширяемый веб-компонент в директорию "webroot/js/webcomp/ext/имяРасширВебКомп/файлы".',
+        // Опция "--extends".
+        $parser->addOption('extends', [
+            'help' => 'Создает веб-компонент "name" с наследованием от "name2". Если веб-компонент(ы) не установлен, устанавливает его (их).',
             'short' => 'e',
             'boolean' => true,
         ]);
 
-        // Опция "--libcopy".
-        $parser->addOption('libcopy', [
-            'help' => 'Копирует библиотеку в директорию "webroot/js/webcomp/lib/имяБиблиотеки.js".',
-            'short' => 'b',
+        // Опция "--addlib".
+        $parser->addOption('addlib', [
+            'help' => 'Создает веб-компонент "name" с подключенной библиотекой "name2". Если библиотек "name2" не установлена, установит её. Если веб-компонент "name" существует в приложении, добавит к нему строку подключения библиотеки "name2".',
+            'short' => 'a',
+            'boolean' => true,
+        ]);
+
+        // Опция "--addextends".
+        $parser->addOption('addextends', [
+            'help' => 'Создает расширяемый веб-компонент "name".',
+            'short' => 'x',
             'boolean' => true,
         ]);
 
@@ -66,206 +93,77 @@ class WebcompCommand extends Command
     /**
      * Запускает команду на исполнение.
      */
-    public function execute(Arguments $args, ConsoleIo $io): int
+    public function execute( Arguments $args, ConsoleIo $io ): int
     {
-        $name = strtolower($args->getArgument('name'));
+        /**
+         * Работаем с аргументами.
+         */
 
-        if (empty($name)) {
-            $io->error('Не задано имя веб-компонента!');
+        // name
+        if ( empty( $args->getArgument('name') ) ) {
+            $io->error( 'Не задано имя веб-компонента!' );
             $this->abort();
         }
 
-        if (!preg_match( '/^[a-zA-Z][a-zA-Z0-9]*$/', $name) ) {
-            $io->error('В название веб-компонента указаны недопустимые символы!');
+        $name = strtolower( $args->getArgument('name') );
+
+        if ( !preg_match( '/^[a-zA-Z][a-zA-Z0-9]*$/', $name ) ) {
+            $io->error( 'В название веб-компонента указаны недопустимые символы!' );
             $this->abort();
         }
 
-        if ($args->getOption('close')) {// Для закрытой схемы.
-            $this->createFiles($name,
-                [// Названия шаблонов для создания файлов.
-                    ['basicclose', 'template', 'test'], 'element',
-                ],
-                [// Названия создаваемых файлов.
-                    [$name.'.js', 'template.js', 'test.js'], $name.'.php',
-                ],
-                [// Директории, где будут созданы файлы.
-                    'webroot' . DS . 'js' . DS . 'webcomp' . DS . $name . DS,
-                    'templates' . DS . 'element' . DS . 'webcomp' . DS,
-                ],
-                $args->getOption('plugin')
+        // name2
+        if ( $args->getArgument( 'name2' ) !== null ) {
+            $name2 = strtolower( $args->getArgument( 'name2' ) );
+            if (!preg_match( '/^[a-zA-Z][a-zA-Z0-9]*$/', $name2 ) and isset( $name2 )) {
+                $io->error('В название указаны недопустимые символы!');
+                $this->abort();
+            }
+        }
+
+        /**
+         * Обрабатываем команды.
+         *
+         * Все опции должны быть перечислены в функции in_array. Сначала перечисляются базовые
+         * опции, которые определяют, что конкретно что должна сделать команда, какой использовать
+         * шаблон для создания веб-компонента. Затем идут вспомогательные опции, которые могут
+         * не указываться, но уточняют команду, набранную в терминале. Например, опция `--plugin`
+         * укажет, что веб-компонент необходимо создавать в плагине.
+         */
+        $basicOption = '';
+        $additionalOption = [];
+        foreach ( $args->getOptions() as $key => $val ) {
+            if ( in_array( $key, ['list', 'extends', 'addlib', 'addextends'] ) and $val ) {
+                $basicOption = $key;
+            }
+            elseif ( in_array( $key, ['plugin', 'close'] ) and $val ) {
+                $additionalOption[] = $key;
+            }
+        }
+
+        /**
+         * Генерируем команду.
+         */
+        $myCom = new MyCommands();
+        $nameMethod = 'wc' . ucfirst( $basicOption );
+        if ( $args->getArgument( 'name2' ) !== null ) {
+            $myCom->$nameMethod(
+                $name,
+                $name2,
+                in_array( 'close', $additionalOption ),
+                in_array( 'plugin', $additionalOption ),
+                $io,
             );
         }
-        else {// Для открытой схемы.
-            if ($args->getOption('list')) {
-                $this->createFiles($name,
-                    [// Названия шаблонов для создания файлов.
-                        ['basic', 'template', 'test'], 'elementlist', 'elementajax'
-                    ],
-                    [// Названия создаваемых файлов.
-                        [$name.'.js', 'template.js', 'test.js'], $name.'.php', $name.'.php',
-                    ],
-                    [// Директории, где будут созданы файлы.
-                        'webroot' . DS . 'js' . DS . 'webcomp' . DS . $name . DS,
-                        'templates' . DS . 'element' . DS . 'webcomp' . DS,
-                        'templates' . DS . 'element' . DS . 'webcomp' . DS . 'ajax' . DS,
-                    ],
-                    false
-                );
-
-                $io->setStyle('greentext', ['text' => 'green']);
-                $io->setStyle('boldik', ['text' => 'green', 'bold' => true]);
-
-                $io->hr();
-                $io->out("<greentext>Создан веб-компонент, содержащий пагинацию (листинг) </greentext><boldik>" . ucfirst($name) . "</boldik>");
-                $io->hr();
-                $io->out("<greentext>Не забудьте в конце действия контроллёра вставить код:</greentext>");
-                $io->out("<greentext>if (\$this->request->is('ajax')) return \$this->render('/element/webcomp/ajax/" . $name . "');</greentext>");
-                $io->hr();
-
-                return static::CODE_SUCCESS;
-            }
-            elseif ($args->getOption('extcopy')) {
-                switch ($name) {
-                    case 'paste':
-                        $this->createFiles($name,
-                            [// Названия шаблонов для создания файлов.
-                                ['extpaste', 'extpastetemplate', 'extpastetest'],
-                            ],
-                            [// Названия создаваемых файлов.
-                                [$name.'.js', 'template.js', 'test.js'],
-                            ],
-                            [// Директории, где будут созданы файлы.
-                                'webroot' . DS . 'js' . DS . 'webcomp' . DS . 'ext' . DS . $name . DS,
-                            ],
-                            false
-                        );
-                        break;
-                    case 'paginator':
-                        $this->createFiles($name,
-                            [// Названия шаблонов для создания файлов.
-                                ['extpaginator', 'extpaginatortemplate', 'extpaginatortest'],
-                            ],
-                            [// Названия создаваемых файлов.
-                                [$name.'.js', 'template.js', 'test.js'],
-                            ],
-                            [// Директории, где будут созданы файлы.
-                                'webroot' . DS . 'js' . DS . 'webcomp' . DS . 'ext' . DS . $name . DS,
-                            ],
-                            false
-                        );
-                        break;
-                    case 'progress':
-                        $this->createFiles($name,
-                            [// Названия шаблонов для создания файлов.
-                                ['extprogress', 'extprogresstemplate', 'extprogresstest'],
-                            ],
-                            [// Названия создаваемых файлов.
-                                [$name.'.js', 'template.js', 'test.js'],
-                            ],
-                            [// Директории, где будут созданы файлы.
-                                'webroot' . DS . 'js' . DS . 'webcomp' . DS . 'ext' . DS . $name . DS,
-                            ],
-                            false
-                        );
-                        break;
-                    default:
-                        $io->setStyle('greentext', ['text' => 'red']);
-                        $io->setStyle('boldik', ['text' => 'red', 'bold' => true]);
-                        $io->hr();
-                        $io->out("<greentext>Расширяемого веб-компонента </greentext><boldik>" . ucfirst($name) . "</boldik><greentext> не существует!</greentext>");
-                        $io->hr();
-                        return static::CODE_SUCCESS;
-                }
-            }
-            elseif ($args->getOption('libcopy')) {
-                switch ($name) {
-                    case 'ajax':
-                        $this->createFiles($name,
-                            [// Названия шаблонов для создания файлов.
-                                ['libajax'],
-                            ],
-                            [// Названия создаваемых файлов.
-                                [$name.'.js'],
-                            ],
-                            [// Директории, где будут созданы файлы.
-                                'webroot' . DS . 'js' . DS . 'webcomp' . DS . 'lib' . DS,
-                            ],
-                            false
-                        );
-                        break;
-                    default:
-                        $io->setStyle('greentext', ['text' => 'red']);
-                        $io->setStyle('boldik', ['text' => 'red', 'bold' => true]);
-                        $io->hr();
-                        $io->out("<greentext>Библиотеки </greentext><boldik>" . ucfirst($name) . "</boldik><greentext> не существует!</greentext>");
-                        $io->hr();
-                        return static::CODE_SUCCESS;
-                }
-            }
-            else {
-                $this->createFiles($name,
-                    [// Названия шаблонов для создания файлов.
-                        ['basic', 'template', 'test'], 'element',
-                    ],
-                    [// Названия создаваемых файлов.
-                        [$name.'.js', 'template.js', 'test.js'], $name.'.php',
-                    ],
-                    [// Директории, где будут созданы файлы.
-                        'webroot' . DS . 'js' . DS . 'webcomp' . DS . $name . DS,
-                        'templates' . DS . 'element' . DS . 'webcomp' . DS,
-                    ],
-                    $args->getOption('plugin')
-                );
-            }
+        else {
+            $myCom->$nameMethod(
+                $name,
+                in_array( 'close', $additionalOption ),
+                in_array( 'plugin', $additionalOption ),
+                $io,
+            );
         }
-
-        $io->setStyle('greentext', ['text' => 'green']);
-        $io->setStyle('boldik', ['text' => 'green', 'bold' => true]);
-
-        $io->hr();
-        $io->out("<greentext>Создан веб-компонент </greentext><boldik>" . ucfirst($name) . "</boldik>");
-        $io->hr();
 
         return static::CODE_SUCCESS;
-    }
-
-    /**
-     * Создаёт новые файлы из шаблонов.
-     *
-     * @param string $name Имя веб-компонента, файлы которого необходимо создать.
-     * @param array $nameTemplateFile Многомерный массив имён шаблонов.
-     * @param array $nameCreateFile   Многомерный массив с перечнем имён файлов, включая расширения
-     *                                файлов, которые необходимо создать.
-     * @param array $dir Одномерный массив, содержащий директории, в которых нужно создать файлы
-     *                   с именами из массива $nameCreateFile.
-     * @param bool $plugin Создать веб-компонент в плагине или в базовом месте.
-     * @return void
-     */
-    public function createFiles( $name, $nameTemplateFile, $nameCreateFile, $dir, $plugin = false ): void
-    {
-        $newFile = new \Webcomponent\Command\Bake\NewfileCommand();
-
-        foreach ($dir as $key => $value) {
-
-            if ($plugin) $path = '..' . DS . 'plugins' . DS . ucfirst($name) . DS;
-            else $path = '..' . DS;
-
-            $newFile->pathFragment = $path . $value;
-
-            if (is_array($nameTemplateFile[$key])) {
-                foreach ($nameTemplateFile[$key] as $key2 => $value2) {
-                    $newFile->nameTemplateReader = $value2;
-                    $newFile->templateName = 'Webcomponent.' . $value2 . 'Template';
-                    $newFile->fileNameSave = $nameCreateFile[$key][$key2];
-                    $this->executeCommand($newFile, [$name]);
-                }
-            }
-            if (is_string($nameTemplateFile[$key])) {
-                $newFile->nameTemplateReader = $nameTemplateFile[$key];
-                $newFile->templateName = 'Webcomponent.' . $nameTemplateFile[$key] . 'Template';
-                $newFile->fileNameSave = $nameCreateFile[$key];
-                $this->executeCommand($newFile, [$name]);
-            }
-        }
     }
 }
