@@ -99,18 +99,17 @@ class WebcompHelperTest extends TestCase
         $in[7][0]['frrt'] = 'sed';
         $in[7][0]['gT'] = 'ddttt';
         $out = [
-            ' class="myWebComp"',
-            ' class="myWebComp"',
-            ' class="myWebComp"',
-            ' class="myWebComp"',
-            ' class="myWebComp"',
-            ' class="myWebComp"',
-            ' myAttr="myString" class="myWebComp"',
-            ' frrt="sed" gT="ddttt" class="myWebComp"',
+            ' class="init myWebComp"',
+            ' class="init myWebComp"',
+            ' class="init myWebComp"',
+            ' class="init myWebComp"',
+            ' class="init myWebComp"',
+            ' class="init myWebComp"',
+            ' myAttr="myString" class="init myWebComp"',
+            ' frrt="sed" gT="ddttt" class="init myWebComp"',
         ];
 
-        for ($i = 0; $i < count($in); $i++)
-        {
+        for ($i = 0; $i < count($in); $i++) {
             $this->Webcomp->setName('myWebComp');
             $result = $this->Webcomp->addAttr($in[$i]);
             $this->assertStringContainsString($out[$i], $result);
@@ -125,7 +124,7 @@ class WebcompHelperTest extends TestCase
         $result = $this->Webcomp->__call('myWebComp', [
             0 => ['view' => 'clear']
         ]);
-        $this->assertStringContainsString('<wc-myWebComp class="myWebComp"></wc-myWebComp>', $result);
+        $this->assertStringContainsString('<div-myWebComp class="init myWebComp"></div-myWebComp>', $result);
 
         $result = $this->Webcomp->__call('myWebComp', [
             0 => [
@@ -133,7 +132,7 @@ class WebcompHelperTest extends TestCase
                 'fir' => 'dwq',
             ]
         ]);
-        $this->assertStringContainsString('<wc-myWebComp fir="dwq" class="myWebComp"></wc-myWebComp>', $result);
+        $this->assertStringContainsString('<div-myWebComp fir="dwq" class="init myWebComp"></div-myWebComp>', $result);
     }
 
     /**
