@@ -92,28 +92,14 @@ class WebcompHelper extends Helper
      * @param  string $name Имя веб-компонента из $this->Webcomp->имяВебКомпонента().
      * @return string       Имя веб-компонента (все буквы в нижнем регистре без подчеркивания).
      */
-    public function nameWebcomp($name): string
+    public function nameWebcomp( $name ): string
     {
-        if (mb_substr_count($name, '_') == 1) {
-            return ucfirst(strtolower(str_replace('_', '.', $name)));
+        if ( mb_substr_count( $name, '_' ) == 1 ) {
+            return ucfirst( strtolower( str_replace( '_', '.', $name ) ) );
         }
 
         return strtolower($name);
     }
-
-    /**
-     * Возвращает имя плагина или пустую строку, если вызов произошёл не из плагина.
-     *
-     * @param  string $name Имя веб-компонента из $this->Webcomp->имяВебКомпонента().
-     * @return string
-     */
-    /*public function namePlugin($name): string
-    {
-        if (mb_substr_count($name, '_') == 1) {
-            return explode('_', $name)[0] . '.';
-        }
-        else return '';
-    }*/
 
     /**
      * Формирует url загрузки для элемента или ячейки.
