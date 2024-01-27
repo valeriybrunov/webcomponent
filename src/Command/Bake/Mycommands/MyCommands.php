@@ -18,7 +18,7 @@ class MyCommands extends ControlCommands
     public $depenText = '';
 
     /**
-     * Создать файлы веб-компонента без базовых опций.
+     * Создать файлы веб-компонента.
      *
      * @param string    $name   Имя веб-компонента.
      * @param bool      $close  Применить закрытую схему для true.
