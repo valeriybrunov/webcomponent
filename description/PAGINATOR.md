@@ -118,7 +118,7 @@ public function initialize(): void
 <?= $this->element('Webcomponent.replace') ?>
 
     <div class="paste__trubber">...</div>
-	<div class="event-scroll"></div>
+    <div class="event-scroll"></div>
 </div>
 ```
 
@@ -147,18 +147,18 @@ if ($this->request->is('ajax')) return $this->render('/element/webcomp/ajax/myco
 Для упрощения создания веб-компонентов с пагинацией применяют команду в терминале:
 
 ```
-$ bin/cake webcomp <name> -list
+$ bin/cake webcomp --list <имяСоздаваемогоВебКомпонента>
 ```
 
 или применяем краткую команду:
 
 ```
-$ bin/cake webcomp <name> -l
+$ bin/cake webcomp -l <имяСоздаваемогоВебКомпонента>
 ```
 
 Также можно применить и другие параметры при необходимости:
 
 ```
-$ bin/cake webcomp <name> -l -c
+$ bin/cake webcomp -l -c <имяСоздаваемогоВебКомпонента>
 ```
 
