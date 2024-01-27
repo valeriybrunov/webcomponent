@@ -5,15 +5,16 @@
 Для использования функциональности расширяемого веб-компонента `Paste` необходимо его импортировать (при помощи import) и унаследоваться от него.
 
 ```js
-import from WEBROOT + '/js/ext/paste/paste.js';
+import from '../ext/paste/paste.js';
+import Template from './template.js';
 
 class ИмяКласса extends Paste {
 
-	/**
-	 * Ваш код.
-	 */
+    /**
+     * Ваш код.
+     */
 
-	/**
+    /**
      * Определяем, за какими атрибутами необходимо наблюдать.
      * 
      * @return array Массив атрибутов.
@@ -26,10 +27,10 @@ class ИмяКласса extends Paste {
      * Следим за изменениями этих атрибутов и отвечаем соответственно.
      */
     attributeChangedCallback( name, oldVal, newVal ) {
-    	super.attributeChangedCallback( name, oldVal, newVal );
-    	/**
-	     * Ваш код.
-	     */
+        super.attributeChangedCallback( name, oldVal, newVal );
+        /**
+         * Ваш код.
+         */
     }
 
     /**
@@ -43,6 +44,12 @@ class ИмяКласса extends Paste {
 
     }
 }
+```
+
+Можно создать файлы веб-компонента с наследованием расширяемого веб-компонента используя терминал:
+
+```text
+$ bin/cake webcomp <имяСоздаваемогоВебКомпонента> --extends paste
 ```
 
 Внутри вашего веб-компонента необходимо разместить вёрстку: труббер и оболочку для замены. Обязательным является наличие класса `paste__trubber` у труббера и `paste__replace` у оболочки замены.
