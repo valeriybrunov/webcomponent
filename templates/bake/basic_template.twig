@@ -15,6 +15,7 @@ export default class {{ name|capitalize }} extends HTMLElement {
     constructor() {
 
         super();
+        this.classList.add('{{ name }}');
         
         // Кеширование элементов компонента не входящих в теневую модель:
         this.dom = Template.mapDom( this );
